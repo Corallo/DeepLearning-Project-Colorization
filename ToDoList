@@ -1,0 +1,10 @@
+If you start with one of these task, please put your name at the left of the task, so that we wont overlapp
+
+1) Build the network architecture
+2) Reproduce their loss function
+3) Build the variants of the network that they propose
+4) Train another network to recognize images (possibly with the same dataset used for the colorize network)
+5X) study an approach to use a GAN network for this problem (architecture etc)
+6) Build the GAN network 
+7) ?? fix future problems
+n) Web App for Turing test
