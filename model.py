@@ -122,7 +122,7 @@ class NNet(torch.nn.Module):
 
         # 1x1 Cross Entropy Loss
         self.conv_ab = torch.nn.Conv2d(in_channels=256, out_channels=313, kernel_size=1,
-                stride=1, padding=1)
+                stride=1, padding=0)
 
 
     def forward(self, image):
