@@ -1,3 +1,8 @@
+*.npy
+ILSVRC2012_img_train/
+*.ipynb
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
