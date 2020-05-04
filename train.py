@@ -77,7 +77,7 @@ def main():
     train_dataset = ImageNet(train_root)
     #val_dataset = datasets.ImageFolder(val_root)
     if not args.evaluate:
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=args.workers, pin_memory=True)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=8, pin_memory=True)
 
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
     print("=> initializing model weights")
