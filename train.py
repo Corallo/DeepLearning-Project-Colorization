@@ -46,7 +46,7 @@ def main():
     # create model
     print("=> creating model")
 
-    model = NNet()
+    model = NNet().float()
 
     # print("paralleling")
     # model = torch.nn.DataParallel(model, device_ids=range(args.nGpus)).cuda()
@@ -82,7 +82,7 @@ def main():
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
     print("=> initializing model weights")
     input_image, _ = next(iter(train_loader))
-    model = kmeans_init(model, input_image, 10, True).cuda()
+    model = kmeans_init(model, input_image, 3, True).cuda()
     # define loss function (criterion) and optimizer
     criterion = classificationLoss
     optimizer = torch.optim.Adam([{'params': model.parameters()},], args.lr,momentum=args.momentum,weight_decay=args.weight_decay, betas=(0.9, 0.99))
