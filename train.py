@@ -17,7 +17,7 @@ import argparse
 import os
 import time
 from tensorboardX import SummaryWriter
-
+from datasets import ImageNet
 
 
 
@@ -73,9 +73,9 @@ def main():
 
     # Data loading code
     train_root = args.train_root
-    val_root = args.val_root
-    train_dataset = datasets.ImageFolder(train_root)
-    val_dataset = datasets.ImageFolder(val_root)
+    #val_root = args.val_root
+    train_dataset = ImageNet(train_root)
+    #val_dataset = datasets.ImageFolder(val_root)
     if not args.evaluate:
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=args.workers, pin_memory=True)
 
