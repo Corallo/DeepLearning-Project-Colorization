@@ -1,5 +1,4 @@
 tmp/
-*.npy
 ILSVRC2012_img_train/
 *.ipynb
 .DS_Store/

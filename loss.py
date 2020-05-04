@@ -4,7 +4,9 @@ from skimage import io, color
 import cv2
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import normalize
+import torch
 
+empirical_probs = torch.from_numpy(np.load('prior_probs.npy'))
 
 def GaussianKernel(v1, v2, sigma=5):
     return np.exp(-np.linalg.norm(v1-v2, 2)**2/(2.*sigma**2))
@@ -36,19 +38,21 @@ def loadColorData(filename):
     return nbrs, colorsList
 
 def v(Z):
-    return 1
+    return empirical_probs[torch.argmax(Z,axis=1)].cuda()
 
 def classificationLoss(Z_hat, Z):
-    loss = - np.sum(v(Z) * np.sum(Z * np.log(Z_hat),axis=2) ,axis=(0,1))
+    loss = - torch.sum(v(Z) * torch.sum(Z * torch.log(Z_hat),axis=2))
     return loss
 
 def regressorLoss(Z_hat,Z):
     return (1/2)*(numpy.linalg.norm(Z-Z_hat))**2
 
-
+"""
 model,colorsList=loadColorData("pts_in_hull.npy")
 randomImg = generateRandomImage()
 randomImg2 = generateRandomImage()
 z_hat =np.random.uniform(0.1,1,size=(66,66,313))
 z = getZfromY(model,colorsList,randomImg)
 l=classificationLoss(z_hat,z)
+
+"""
