@@ -50,7 +50,7 @@ def getYgivenZ(Z, w=64, h=64, Q=313, T=0.38):
 def testfun():
     img = np.random.randint(0,255,(64,64,3),dtype=np.uint8)
 
-    plt.imgshow(img)
+    plt.imshow(img)
     inputImage = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
     light = inputImage[:,:,0]
     raw_ab = cv2.resize(inputImage, (64, 64), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0
@@ -61,6 +61,7 @@ def testfun():
     newImg = np.zeros((64,64,3))
     newImg[:,:,0]=light
     newImg[:,:,1:]=Y
-    inputImage = cv2.cvtColor(newImg, cv2.COLOR_LAB2RGB)
-    plt.imshow(newImg)
+    inputImage = cv2.cvtColor(newImg.astype(np.uint8), cv2.COLOR_LAB2RGB)
+    plt.imshow(inputImage)
     print(Y)
+    
