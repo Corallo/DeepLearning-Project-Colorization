@@ -40,13 +40,13 @@ def loadColorData(filename):
     return nbrs, colorsList
 
 def v(Z):
-    args = torch.argmax(Z,axis=1)
+    args = torch.argmax(Z,dim=1)
     ant_size = tuple(args.size())
-    return torch.from_numpy(empirical_probs[args.reshape(-1)].reshape(ant_size)).cuda()
+    return torch.from_numpy(empirical_probs[args.cpu().reshape(-1)].reshape(ant_size)).cuda()
 
 def classificationLoss(Z_hat, Z):
 
-    loss = - torch.sum(v(Z) * torch.sum(Z.cuda() * torch.log(softmax(Z_hat, dim=1)),axis=1))
+    loss = - torch.sum(v(Z) * torch.sum(Z.cuda() * torch.log(softmax(Z_hat, dim=1)),dim=1))
     return loss
 
 def regressorLoss(Z_hat,Z):

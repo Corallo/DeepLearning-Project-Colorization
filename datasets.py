@@ -2,9 +2,8 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 import os
 import cv2
-from sklearn.neighbors import NearestNeighbors
 import numpy as np
-from scipy.special import softmax
+import torch
 
 class ImageNet(Dataset):
     def __init__(self, rootDir):
@@ -39,8 +38,7 @@ class ImageNet(Dataset):
         imgPath = self.listData[i]
         inputImage = cv2.cvtColor(cv2.imread(imgPath), cv2.COLOR_RGB2LAB)
         image_ab = self.transf(cv2.resize(inputImage, (64, 64), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0)
-        image_L = self.transf(inputImage[:,:,0].astype(float))
-
+        image_L = torch.from_numpy(inputImage[:,:,0].astype(float)).unsqueeze_(0)
         #encoded_ab = self.transf(np.apply_along_axis(self.soft_encode_i,-1,image_ab))
         
         return image_L, image_ab

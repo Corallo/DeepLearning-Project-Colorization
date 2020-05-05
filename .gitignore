@@ -1,3 +1,6 @@
+models/
+runs/
+Imagenet/
 tmp/
 ILSVRC2012_img_train/
 *.ipynb

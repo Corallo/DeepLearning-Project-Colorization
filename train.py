@@ -83,7 +83,7 @@ def main():
 
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
     print("=> initializing model weights")
-    input_image, _ = next(iter(train_loader))
+    #input_image, _ = next(iter(train_loader))
     #model = kmeans_init(model, input_image.double().cuda(), 3, True)
     model.apply(weights_init)
     print("=> model weights initialized")
@@ -117,6 +117,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
     model.train()
     batch_time = AverageMeter()
+    forward_time = AverageMeter()
+    loss_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
 
@@ -127,9 +129,13 @@ def train(train_loader, model, criterion, optimizer, epoch):
         encoded_target = utils.soft_encode_ab(target)
         var = Variable(img.double(), requires_grad=True).cuda()
         # compute output
+        forwardTime = time.time()
         output = model(var - 50.0)
+        forward_time.update(time.time() - forwardTime)
         # record loss
-        loss = criterion(output, encoded_target)
+        lossTime = time.time()
+        loss = criterion(output, encoded_target.cuda())
+        loss_time.update(time.time() - lossTime)
         # measure accuracy and record loss
         #prec1, = accuracy(output.data, target)
         losses.update(loss.data, var.size(0))
@@ -147,8 +153,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                  'Forward {forward_time.val:.3f} ({forward_time.avg:.3f})\t'
+                  'LossTime {loss_time.val:.3f} ({loss_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
-                   epoch, i, len(train_loader), batch_time=batch_time,
+                   epoch, i, len(train_loader), batch_time=batch_time, forward_time=forward_time, loss_time=loss_time,
                    data_time=data_time, loss=losses))
         if i % 5000 == 0:
             save_checkpoint({
