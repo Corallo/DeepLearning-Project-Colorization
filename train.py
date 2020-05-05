@@ -73,7 +73,9 @@ def main():
                       .format(path, checkpoint['epoch']))
             else:
                 print("=> no checkpoint found at '{}'".format(path))
-
+    else:
+        model.apply(weights_init)
+        print("=> model weights initialized")
     # Data loading code
     train_root = args.train_root
     #val_root = args.val_root
@@ -83,11 +85,11 @@ def main():
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=8, pin_memory=True)
 
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
-    print("=> initializing model weights")
+
     #input_image, _ = next(iter(train_loader))
     #model = kmeans_init(model, input_image.double().cuda(), 3, True)
-    model.apply(weights_init)
-    print("=> model weights initialized")
+
+
     # define loss function (criterion) and optimizer
     criterion = loss.classificationLoss
     optimizer = torch.optim.Adam([{'params': model.parameters()},], args.lr,weight_decay=args.weight_decay, betas=(0.9, 0.99))
