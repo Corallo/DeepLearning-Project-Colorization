@@ -157,6 +157,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
         if i+1 % 5000 == 0:
+            print("Saving checkpoint...")
             save_checkpoint({
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
