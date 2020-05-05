@@ -35,3 +35,14 @@ def soft_encode_ab(raw_ab):
     encoded_ab = encoded_ab_flat.reshape(enc_shape).transpose(reversed_ax)
     
     return torch.from_numpy(encoded_ab)
+
+
+def getYgivenZ(Z, w=66, h=66, Q=313, T=0.38, filename="pts_in_hull.npy"):
+    colorsList = np.load(filename)
+    Z=Z.reshape(w*h,Q)
+    num = np.exp(np.log(Z)/T)
+    den = np.sum(np.exp(np.log(Z)/T),axis=1)
+    ft= num/den[:,None]
+    assert(np.sum(ft,axis=0).all(0)==1) #should sum 1
+    Y=np.dot(ft,colorsList).reshape(w,h,2)
+    return Y
