@@ -1,4 +1,4 @@
-
+from tqdm import tqdm
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
@@ -46,7 +46,7 @@ def main():
     # create model
     print("=> creating model")
 
-    model = NNet().float()
+    model = NNet().double().cuda()
 
     # print("paralleling")
     # model = torch.nn.DataParallel(model, device_ids=range(args.nGpus)).cuda()
@@ -82,10 +82,11 @@ def main():
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
     print("=> initializing model weights")
     input_image, _ = next(iter(train_loader))
-    model = kmeans_init(model, input_image, 3, True).cuda()
+    model = kmeans_init(model, input_image.double().cuda(), 3, True)
+    print("=> model weights initialized")
     # define loss function (criterion) and optimizer
     criterion = classificationLoss
-    optimizer = torch.optim.Adam([{'params': model.parameters()},], args.lr,momentum=args.momentum,weight_decay=args.weight_decay, betas=(0.9, 0.99))
+    optimizer = torch.optim.Adam([{'params': model.parameters()},], args.lr,weight_decay=args.weight_decay, betas=(0.9, 0.99))
 
 
     if args.evaluate:
@@ -117,18 +118,18 @@ def train(train_loader, model, criterion, optimizer, epoch):
     losses = AverageMeter()
 
     end = time.time()
-    for i, (img, target) in enumerate(train_loader):
+    for i, (img, target) in tqdm(enumerate(train_loader)):
         # measure data loading time
         data_time.update(time.time() - end)
-        encoded_target = utils.soft_encode_ab(target).cuda()
-        var = Variable(img, requires_grad=True).cuda()
+        encoded_target = utils.soft_encode_ab(target).double()
+        var = Variable(img.double(), requires_grad=True).cuda()
         # compute output
         output = model(var)
         # record loss
         loss = criterion(output, encoded_target)
         # measure accuracy and record loss
         #prec1, = accuracy(output.data, target)
-        losses.update(loss.data, input.size(0))
+        losses.update(loss.data, var.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()

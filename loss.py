@@ -6,7 +6,8 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import normalize
 import torch
 
-empirical_probs = torch.from_numpy(np.load('prior_probs.npy'))
+empirical_probs = (0.5*np.load('prior_probs.npy') + (0.5/313))**(-1)
+empirical_probs = empirical_probs/np.sum(empirical_probs)
 
 def GaussianKernel(v1, v2, sigma=5):
     return np.exp(-np.linalg.norm(v1-v2, 2)**2/(2.*sigma**2))
@@ -38,10 +39,12 @@ def loadColorData(filename):
     return nbrs, colorsList
 
 def v(Z):
-    return empirical_probs[torch.argmax(Z,axis=1)].cuda()
+    args = torch.argmax(Z,axis=1)
+    ant_size = tuple(args.size())
+    return torch.from_numpy(empirical_probs[args.reshape(-1)].reshape(ant_size)).cuda()
 
 def classificationLoss(Z_hat, Z):
-    loss = - torch.sum(v(Z) * torch.sum(Z * torch.log(Z_hat),axis=2))
+    loss = - torch.sum(v(Z) * torch.sum(Z.cuda() * torch.log(Z_hat),axis=1))
     return loss
 
 def regressorLoss(Z_hat,Z):
