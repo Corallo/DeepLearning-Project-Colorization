@@ -66,7 +66,7 @@ def main():
                 print("=> loading checkpoint '{}'".format(args.resume))
                 checkpoint = torch.load(path)
                 args.start_epoch = checkpoint['epoch']
-                best_prec1 = checkpoint['best_prec1']
+                #best_prec1 = checkpoint['best_prec1']
                 net.load_state_dict(checkpoint['state_dict'])
 
                 print("=> loaded checkpoint '{}' (epoch {})"

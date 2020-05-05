@@ -4,12 +4,17 @@ import os
 import cv2
 import numpy as np
 import torch
+from PIL import Image
 
 class ImageNet(Dataset):
     def __init__(self, rootDir):
         self.rootDir = rootDir
 
-        self.transf = transf = transforms.ToTensor()
+        self.transf = transforms.Compose([
+            transforms.Scale(256),
+            transforms.RandomCrop(224),
+        ])
+        self.toTensor = transforms.ToTensor();
         # Prepare list data paths
         self.listData = []
         imgPaths = os.listdir(self.rootDir)
@@ -36,9 +41,9 @@ class ImageNet(Dataset):
     def __getitem__(self, i):
 
         imgPath = self.listData[i]
-        inputImage = cv2.cvtColor(cv2.imread(imgPath), cv2.COLOR_RGB2LAB)
-        image_ab = self.transf(cv2.resize(inputImage, (64, 64), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0)
-        image_L = torch.from_numpy(inputImage[:,:,0].astype(float)).unsqueeze_(0)
+        inputImage = np.array(self.transf(Image.fromarray(cv2.cvtColor(cv2.imread(imgPath), cv2.COLOR_RGB2LAB))))
+        image_ab = self.toTensor(cv2.resize(inputImage, (56, 56), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0)
+        image_L = torch.from_numpy(inputImage[:,:,0].astype(float)).unsqueeze_(0) - 50.0
         #encoded_ab = self.transf(np.apply_along_axis(self.soft_encode_i,-1,image_ab))
         
         return image_L, image_ab
