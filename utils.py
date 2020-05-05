@@ -37,7 +37,7 @@ def soft_encode_ab(raw_ab):
     return torch.from_numpy(encoded_ab)
 
 
-def getYgivenZ(Z, w=66, h=66, Q=313, T=0.38):
+def getYgivenZ(Z, w=64, h=64, Q=313, T=0.38):
     colorsList =ab_bins
     Z=Z.reshape((-1,Q))
     num = np.exp(np.log(Z)/T)
