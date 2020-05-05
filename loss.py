@@ -46,7 +46,7 @@ def v(Z):
 
 def classificationLoss(Z_hat, Z):
 
-    loss = - torch.sum(v(Z) * torch.sum(Z.cuda() * torch.log(softmax(Z_hat, dim=1)),dim=1))
+    loss = - torch.sum(v(Z) * torch.sum(Z.cuda() * torch.log(softmax(Z_hat, dim=1)),dim=1))/Z.size(0)
     return loss
 
 def regressorLoss(Z_hat,Z):

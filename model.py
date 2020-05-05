@@ -142,3 +142,88 @@ class NNet(torch.nn.Module):
 
         return conv_ab
 
+class NNetReduced(torch.nn.Module):
+
+    def __init__(self):
+        super(NNetReduced, self).__init__()
+
+                #  --- conv1 --- 
+        self.conv1 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3,
+                stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3,
+                stride=2, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(num_features=64)
+        )
+
+        #  --- conv2 --- 
+        self.conv2 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3,
+                stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3,
+                stride=2, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(num_features=128)
+        )
+
+        #  --- conv3 --- 
+        self.conv3 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3,
+                stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3,
+                stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3,
+                stride=2, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(num_features=256)
+        )
+
+        #  --- conv5 --- 
+        self.conv5 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3,
+                stride=1, padding=2, dilation=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3,
+                stride=1, padding=2, dilation=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3,
+                stride=1, padding=2, dilation=2),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(num_features=512)
+        )
+
+        #  --- conv8 --- 
+        self.conv8 = torch.nn.Sequential(
+            torch.nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=4,
+                stride=2, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3,
+                stride=1, padding=1),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3,
+                stride=1, padding=1),
+            torch.nn.ReLU()
+        )
+
+        # 1x1 Cross Entropy Loss
+        self.conv_ab = torch.nn.Conv2d(in_channels=256, out_channels=313, kernel_size=1,
+                stride=1, padding=0)
+
+    def forward(self, image):
+
+        # Simple forward pass to the network
+        # through all the convolutional blocks
+
+        conv1 = self.conv1(image)
+        conv2 = self.conv2(conv1)
+        conv3 = self.conv3(conv2)
+        conv5 = self.conv5(conv3)
+        conv8 = self.conv8(conv5)
+        conv_ab = self.conv_ab(conv8)
+
+        return conv_ab

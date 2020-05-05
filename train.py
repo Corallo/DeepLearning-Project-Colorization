@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 
 
 from loss import classificationLoss
-from model import NNet
+from model import *
 import utils
 from k_means_init import kmeans_init
 import argparse
@@ -37,6 +37,7 @@ parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', hel
 parser.add_argument('--resume', default='models/model.pth.tar', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_false',help='use pre-trained model')
+parser.add_argument('--reduced', dest='reduced', action='store_true', help='use reduced-model')
 
 best_prec1 = 0
 writer = SummaryWriter()
@@ -48,7 +49,10 @@ def main():
     # create model
     print("=> creating model")
 
-    model = NNet().double().cuda()
+    if args.reduced:
+        model = NNetReduced().double().cuda()
+    else:
+        model = NNet().double().cuda()
 
     # print("paralleling")
     # model = torch.nn.DataParallel(model, device_ids=range(args.nGpus)).cuda()
@@ -110,7 +114,7 @@ def main():
         save_checkpoint({
             'epoch': epoch + 1,
             'state_dict': model.state_dict(),
-        }, False)
+        }, args.reduced)
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
@@ -158,11 +162,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
                    epoch, i, len(train_loader), batch_time=batch_time, forward_time=forward_time, loss_time=loss_time,
                    data_time=data_time, loss=losses))
-        if i % 5000 == 0:
+        if i+1 % 5000 == 0:
             save_checkpoint({
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
-            }, False)
+            }, args.reduced)
         writer.add_scalar('data/loss_train', losses.avg, i + epoch*len(train_loader))
 
 
@@ -196,10 +200,11 @@ def validate(val_loader, model, criterion, epoch):
     return 
 
 
-def save_checkpoint(state, is_best, filename='model'):
-    torch.save(state, "models/" + filename + '_latest.pth.tar')
-    if is_best:
-        shutil.copyfile("models/" + filename + '_latest.pth.tar', "models/" + filename + '_best.pth.tar')
+def save_checkpoint(state, reduced, filename='model'):
+    if reduced:
+        torch.save(state, "models/" + filename + '_reduced_latest.pth.tar')
+    else:
+        torch.save(state, "models/" + filename + '_latest.pth.tar')
 
 
 class AverageMeter(object):
