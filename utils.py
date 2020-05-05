@@ -46,3 +46,11 @@ def getYgivenZ(Z, w=66, h=66, Q=313, T=0.38):
     assert(np.sum(ft,axis=0).all(0)==1) #should sum 1
     Y=np.dot(ft,colorsList).reshape(w,h,2)
     return Y
+
+def testfun():
+    img = np.random.randint(0,255,(64,64,3),dtype=np.uint8)
+    inputImage = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+    raw_ab = cv2.resize(inputImage, (64, 64), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0
+    Z = soft_encode_ab(raw_ab)
+    Y = getYgivenZ(Z)
+    print(Y)
