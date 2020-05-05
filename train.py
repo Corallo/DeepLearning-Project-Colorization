@@ -19,7 +19,9 @@ import time
 from tensorboardX import SummaryWriter
 from datasets import ImageNet
 
-
+def weights_init(m):
+    if isinstance(m, nn.Conv2d):
+        torch.nn.init.xavier_normal_(m.weight.data)
 
 parser = argparse.ArgumentParser(description='PyTorch Incidents Training')
 
@@ -82,7 +84,8 @@ def main():
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
     print("=> initializing model weights")
     input_image, _ = next(iter(train_loader))
-    model = kmeans_init(model, input_image.double().cuda(), 3, True)
+    #model = kmeans_init(model, input_image.double().cuda(), 3, True)
+    model.apply(weights_init)
     print("=> model weights initialized")
     # define loss function (criterion) and optimizer
     criterion = classificationLoss
@@ -118,13 +121,13 @@ def train(train_loader, model, criterion, optimizer, epoch):
     losses = AverageMeter()
 
     end = time.time()
-    for i, (img, target) in tqdm(enumerate(train_loader)):
+    for i, (img, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-        encoded_target = utils.soft_encode_ab(target).double()
+        encoded_target = utils.soft_encode_ab(target)
         var = Variable(img.double(), requires_grad=True).cuda()
         # compute output
-        output = model(var)
+        output = model(var - 50.0)
         # record loss
         loss = criterion(output, encoded_target)
         # measure accuracy and record loss
@@ -147,6 +150,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
+        if i % 5000 == 0:
+            save_checkpoint({
+                'epoch': epoch,
+                'state_dict': model.state_dict(),
+            }, False)
         writer.add_scalar('data/loss_train', losses.avg, i + epoch*len(train_loader))
 
 
