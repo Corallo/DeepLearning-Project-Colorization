@@ -56,7 +56,8 @@ def main():
 
     # print("paralleling")
     # model = torch.nn.DataParallel(model, device_ids=range(args.nGpus)).cuda()
-        
+    model.apply(weights_init)
+    print("=> model weights initialized")
     print(model)
 
     # optionally resume from a checkpoint
@@ -73,9 +74,7 @@ def main():
                       .format(path, checkpoint['epoch']))
             else:
                 print("=> no checkpoint found at '{}'".format(path))
-    else:
-        model.apply(weights_init)
-        print("=> model weights initialized")
+
     # Data loading code
     train_root = args.train_root
     #val_root = args.val_root
