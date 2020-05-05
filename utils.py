@@ -39,7 +39,7 @@ def soft_encode_ab(raw_ab):
 
 def getYgivenZ(Z, w=66, h=66, Q=313, T=0.38):
     colorsList =ab_bins
-    Z=Z.reshape(-1,Q)
+    Z=Z.reshape((-1,Q))
     num = np.exp(np.log(Z)/T)
     den = np.sum(np.exp(np.log(Z)/T),axis=1)
     ft= num/den[:,None]
