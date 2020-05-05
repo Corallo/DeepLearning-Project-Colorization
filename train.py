@@ -50,9 +50,9 @@ def main():
     print("=> creating model")
 
     if args.reduced:
-        model = NNetReduced().double().cuda()
+        model = nn.DataParallel(NNetReduced()).cuda()
     else:
-        model = NNet().double().cuda()
+        model = nn.DataParallel(NNet()).cuda()
 
     # print("paralleling")
     # model = torch.nn.DataParallel(model, device_ids=range(args.nGpus)).cuda()
@@ -74,9 +74,6 @@ def main():
             else:
                 print("=> no checkpoint found at '{}'".format(path))
 
-    # Ni idea de que es
-    cudnn.benchmark = True
-    torch.autograd.profiler.profile(use_cuda=True)
     # Data loading code
     train_root = args.train_root
     #val_root = args.val_root
@@ -128,10 +125,10 @@ def train(train_loader, model, criterion, optimizer, epoch):
     for i, (img, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-        encoded_target = Variable(utils.soft_encode_ab(target), requires_grad=False).cuda()
-        var = Variable(img.double(), requires_grad=True).cuda()
+        encoded_target = Variable(utils.soft_encode_ab(target).float(), requires_grad=False).cuda()
+        var = Variable(img.float(), requires_grad=True).cuda()
         # compute output
-        output = model(var - 50.0)
+        output = model(var)
         # record loss
         loss = criterion(output, encoded_target)
         # measure accuracy and record loss
