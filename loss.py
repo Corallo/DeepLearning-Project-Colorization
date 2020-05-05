@@ -8,7 +8,7 @@ import torch
 from torch.nn.functional import softmax
 
 empirical_probs = (0.5*np.load('prior_probs.npy') + (0.5/313))**(-1)
-empirical_probs = empirical_probs/np.sum(empirical_probs)
+empirical_probs = torch.from_numpy(empirical_probs/np.sum(empirical_probs)).cuda()
 
 def GaussianKernel(v1, v2, sigma=5):
     return np.exp(-np.linalg.norm(v1-v2, 2)**2/(2.*sigma**2))
@@ -42,11 +42,11 @@ def loadColorData(filename):
 def v(Z):
     args = torch.argmax(Z,dim=1)
     ant_size = tuple(args.size())
-    return torch.from_numpy(empirical_probs[args.cpu().reshape(-1)].reshape(ant_size)).cuda()
+    return empirical_probs[args.reshape(-1)].reshape(ant_size).cuda()
+
 
 def classificationLoss(Z_hat, Z):
-
-    loss = - torch.sum(v(Z) * torch.sum(Z.cuda() * torch.log(softmax(Z_hat, dim=1)),dim=1))/Z.size(0)
+    loss = - torch.sum(v(Z) * torch.sum(Z * torch.log(softmax(Z_hat, dim=1)),dim=1))/Z.size(0)
     return loss
 
 def regressorLoss(Z_hat,Z):
