@@ -22,7 +22,7 @@ class ImageNet(Dataset):
             totalDirPath = os.path.join(self.rootDir,dirPath)
             imagePaths = os.listdir(totalDirPath)
             for imagePath in imagePaths:
-                if imagePaths.split('.')[-1].lower() != 'jpeg':
+                if imagePath.split('.')[-1].lower() != 'jpeg':
                     print("Found corrupted path", imagePaths)
                 else:
                     self.listData.append(os.path.join(totalDirPath,imagePath))
