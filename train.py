@@ -125,7 +125,8 @@ def train(train_loader, model, criterion, optimizer, epoch):
     end = time.time()
     for i, (img, target) in enumerate(train_loader):
         # measure data loading time
-
+        if img is None:
+            continue
         data_time.update(time.time() - end)
         encoded_target = Variable(utils.soft_encode_ab(target).float(), requires_grad=False).cuda()
         var = Variable(img.float(), requires_grad=True).cuda()
@@ -155,8 +156,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
-
-        if (i+1) % 1000 == 0:
+        if (i+1) % 5000 == 0:
             print("Saving checkpoint...")
             save_checkpoint({
                 'epoch': epoch,
