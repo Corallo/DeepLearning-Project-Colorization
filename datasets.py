@@ -11,7 +11,7 @@ class ImageNet(Dataset):
         self.rootDir = rootDir
 
         self.transf = transforms.Compose([
-            transforms.Scale(256),
+            transforms.Resize(256),
             transforms.RandomCrop(224),
         ])
         self.toTensor = transforms.ToTensor();
