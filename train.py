@@ -82,7 +82,7 @@ def main():
     #val_dataset = datasets.ImageFolder(val_root)
     if not args.evaluate:
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=8, pin_memory=True)
-
+        print("=> Loaded data, length = ", len(train_dataset))
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
 
     #input_image, _ = next(iter(train_loader))
