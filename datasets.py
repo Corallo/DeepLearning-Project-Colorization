@@ -46,7 +46,7 @@ class ImageNet(Dataset):
             return None, None
         inputImage = np.array(self.transf(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_RGB2LAB))))
         image_ab = self.toTensor(cv2.resize(inputImage, (56, 56), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0)
-        image_L = torch.from_numpy(inputImage[:,:,0].astype(float)).unsqueeze_(0) - 50.0
+        image_L = torch.from_numpy(inputImage[:,:,0].astype(float)*100.0/255.0).unsqueeze_(0) - 50.0
         #encoded_ab = self.transf(np.apply_along_axis(self.soft_encode_i,-1,image_ab))
         
         return image_L, image_ab
