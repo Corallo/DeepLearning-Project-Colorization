@@ -125,8 +125,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     end = time.time()
     for i, (img, target) in enumerate(train_loader):
         # measure data loading time
-        if img is None:
-            continue
+
         data_time.update(time.time() - end)
         encoded_target = Variable(utils.soft_encode_ab(target).float(), requires_grad=False).cuda()
         var = Variable(img.float(), requires_grad=True).cuda()

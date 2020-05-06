@@ -22,7 +22,10 @@ class ImageNet(Dataset):
             totalDirPath = os.path.join(self.rootDir,dirPath)
             imagePaths = os.listdir(totalDirPath)
             for imagePath in imagePaths:
-                self.listData.append(os.path.join(totalDirPath,imagePath))
+                if imagePaths.split('.')[-1].lower() != 'jpeg':
+                    print("Found corrupted path", imagePaths)
+                else:
+                    self.listData.append(os.path.join(totalDirPath,imagePath))
 
         #ab_bins = np.load('pts_in_hull.npy')
         #nbrs = NearestNeighbors(n_neighbors=5, algorithm='ball_tree', p=2).fit(ab_bins)
@@ -42,8 +45,7 @@ class ImageNet(Dataset):
 
         imgPath = self.listData[i]
         img = cv2.imread(imgPath)
-        if img is None:
-            return None, None
+
         inputImage = np.array(self.transf(Image.fromarray(cv2.cvtColor(img, cv2.COLOR_RGB2LAB))))
         image_ab = self.toTensor(cv2.resize(inputImage, (56, 56), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float) - 128.0)
         image_L = torch.from_numpy(inputImage[:,:,0].astype(float)*100.0/255.0).unsqueeze_(0) - 50.0
