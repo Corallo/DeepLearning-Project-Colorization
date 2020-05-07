@@ -70,7 +70,7 @@ def main():
 
     # print("paralleling")
     # model = torch.nn.DataParallel(model, device_ids=range(args.nGpus)).cuda()
-    model.apply(weights_init)
+    weights_init(model,args)
     print("=> model weights initialized")
     print(model)
 
