@@ -18,10 +18,8 @@ import os
 import time
 from tensorboardX import SummaryWriter
 from datasets import ImageNet
+import kmeans_init
 
-def weights_init(m):
-    if isinstance(m, nn.Conv2d):
-        torch.nn.init.xavier_normal_(m.weight.data)
 
 parser = argparse.ArgumentParser(description='PyTorch Incidents Training')
 
@@ -39,8 +37,14 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true', he
 parser.add_argument('--pretrained', dest='pretrained', action='store_false',help='use pre-trained model')
 parser.add_argument('--reduced', dest='reduced', action='store_true', help='use reduced-model')
 parser.add_argument('--run_dir', default='', type=str)
+parser.add_argument('--kmeans_source', default='imagenet/', type=str)
 
 
+
+def weights_init(m, args):
+    kmeans_init.kmeans_init(m, utils.load_images(args),num_iter=3, use_whitening=False)
+    # if isinstance(m, nn.Conv2d):
+    #     torch.nn.init.xavier_normal_(m.weight.data)
 
 best_prec1 = 0
 writer = SummaryWriter()

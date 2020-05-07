@@ -1,6 +1,9 @@
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 import torch
+from PIL import Image
+import glob
+
 
 ab_bins = np.load('pts_in_hull.npy')
 nbrs = NearestNeighbors(n_neighbors=5, algorithm='kd_tree', p=2).fit(ab_bins)
@@ -73,4 +76,24 @@ def testfun():
     inputImage = cv2.cvtColor(newImg.astype(np.uint8), cv2.COLOR_LAB2RGB)
     plt.imshow(inputImage)
     print(Y)
-    
+
+def load_images(args):
+    extensions = ['JPEG', 'jpg', 'png', 'PNG']
+    images = []
+    for ext in extensions:        
+        images += list(glob.glob(os.path.join(args.kmeans_source, "*." + ext)))
+
+    imgs = []
+    for path in images:
+        img = Image.open(path).convert('RGB').resize((opt.image_size, opt.image_size))
+        img = np.array(img).astype(np.float32)
+        img = np.expand_dims(img, 0)
+        imgs.append(img)
+        if len(imgs) > args.batch_size:
+            break
+
+    img = np.concatenate(imgs, axis=0)        
+    img = img.transpose((0, 3, 1, 2))
+    img = img * 2 /255.0 - 1
+
+    return torch.from_numpy(img)
