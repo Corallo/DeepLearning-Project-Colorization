@@ -35,7 +35,7 @@ class ImageNet(Dataset):
     def __getitem__(self, i):
 
         imgPath = self.listData[i]
-        img = Image.open(imgPath)
+        img = Image.open(imgPath).convert('RGB')
 
         inputImage = rgb2lab(np.array(self.transf(img)))
         image_ab = self.toTensor(cv2.resize(inputImage, (32, 32), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float))
