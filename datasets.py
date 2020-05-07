@@ -41,4 +41,4 @@ class ImageNet(Dataset):
         image_ab = self.toTensor(cv2.resize(inputImage, (32, 32), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float))
         image_L = torch.from_numpy(inputImage[:,:,0].astype(float)).unsqueeze_(0) - 50.0
         
-        return self.toTensor(img), image_L, image_ab
+        return image_L, image_ab
