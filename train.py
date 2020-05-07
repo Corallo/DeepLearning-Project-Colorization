@@ -50,7 +50,7 @@ def main():
     args = parser.parse_args()
     print(args)
 
-    if run_dir == '':
+    if args.run_dir == '':
         writer = SummaryWriter()
     else:
         print("=> Logs can be found in", args.run_dir)
