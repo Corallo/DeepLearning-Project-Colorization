@@ -92,7 +92,7 @@ def main():
     #val_dataset = datasets.ImageFolder(val_root)
     if not args.evaluate:
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=8, pin_memory=True)
-
+        print("=> Loaded data, length = ", len(train_dataset))
     #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
 
     #input_image, _ = next(iter(train_loader))
@@ -168,8 +168,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
-
-        if (i+1) % 1000 == 0:
+        if (i+1) % 5000 == 0:
             print("Saving checkpoint...")
             save_checkpoint({
                 'epoch': epoch,

@@ -47,6 +47,15 @@ def getYgivenZ(Z, w=64, h=64, Q=313, T=0.38):
     Y=np.dot(ft,colorsList).reshape(w,h,2)
     return Y
 
+def generateImg(Z,light):
+    Y = getYgivenZ(Z)
+    newImg = np.zeros((64,64,3))
+    newImg[:,:,0]=light
+    newImg[:,:,1:]=Y
+    Image = cv2.cvtColor(newImg.astype(np.uint8), cv2.COLOR_LAB2RGB)
+    return Image
+    
+
 def testfun():
     img = np.random.randint(0,255,(64,64,3),dtype=np.uint8)
 
