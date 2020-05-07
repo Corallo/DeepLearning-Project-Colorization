@@ -38,6 +38,9 @@ parser.add_argument('--resume', default='models/model.pth.tar', type=str, metava
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_false',help='use pre-trained model')
 parser.add_argument('--reduced', dest='reduced', action='store_true', help='use reduced-model')
+parser.add_argument('--run_dir', default='', type=str)
+
+
 
 best_prec1 = 0
 writer = SummaryWriter()
@@ -46,6 +49,13 @@ def main():
     global args, best_prec1
     args = parser.parse_args()
     print(args)
+
+    if run_dir == '':
+        writer = SummaryWriter()
+    else:
+        print("=> Logs can be found in", args.run_dir)
+        writer = SummaryWriter(args.run_dir)
+
     # create model
     print("=> creating model")
 
@@ -99,6 +109,7 @@ def main():
         return
 
     for epoch in range(args.start_epoch, args.epochs):
+        print("=> Epoch", epoch, "started.")
         adjust_learning_rate(optimizer, epoch)
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch)
@@ -113,6 +124,7 @@ def main():
             'epoch': epoch + 1,
             'state_dict': model.state_dict(),
         }, args.reduced)
+        print("=> Epoch", epoch, "finished.")
 
 
 def train(train_loader, model, criterion, optimizer, epoch):
