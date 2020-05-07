@@ -45,6 +45,7 @@ def weights_init(m, args):
     #kmeans_init.kmeans_init(m, utils.load_images(args),num_iter=3, use_whitening=False)
     if isinstance(m, nn.Conv2d):
         torch.nn.init.xavier_normal_(m.weight.data)
+        torch.init.constant_(m.bias.data, 0.1)
 
 best_prec1 = 0
 writer = SummaryWriter()
