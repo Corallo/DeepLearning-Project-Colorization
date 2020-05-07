@@ -40,15 +40,23 @@ def soft_encode_ab(raw_ab):
     return torch.from_numpy(encoded_ab)
 
 
-def getYgivenZ(Z, w=64, h=64, Q=313, T=0.38):
-    colorsList =ab_bins
-    Z=Z.reshape((-1,Q))
-    num = np.exp(np.log(Z)/T)
-    den = np.sum(np.exp(np.log(Z)/T),axis=1)
-    ft= num/den[:,None]
-    assert(np.sum(ft,axis=0).all(0)==1) #should sum 1
-    Y=np.dot(ft,colorsList).reshape(w,h,2)
-    return Y
+def decode(Z, Q=313, T=1):
+
+    Z = torch.exp(Z/T)
+
+    Z = (Z/Z.sum(dim=1, keepdim=True)).numpy()
+    nax = np.setdiff1d(np.arange(0,Z.ndim),np.array((1)))
+    axorder = np.concatenate((nax,np.array(1).flatten()),axis=0)
+
+    flat_Z = Z.transpose((axorder)).reshape((-1,Q))
+    
+    flat_Y = np.dot(flat_Z, ab_bins)
+    
+    Yshape = np.array(Z.shape)[nax].tolist()
+    Yshape.append(flat_Y.shape[1])
+
+    return flat_Y.reshape(Yshape)
+
 
 def generateImg(Z,light):
     Y = getYgivenZ(Z)
@@ -76,6 +84,7 @@ def testfun():
     inputImage = cv2.cvtColor(newImg.astype(np.uint8), cv2.COLOR_LAB2RGB)
     plt.imshow(inputImage)
     print(Y)
+
 
 def load_images(args):
     extensions = ['JPEG', 'jpg', 'png', 'PNG']

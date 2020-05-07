@@ -13,7 +13,7 @@ class ImageNet(Dataset):
 
         self.transf = transforms.Compose([
             transforms.Resize(256),
-            transforms.RandomCrop(224),
+            transforms.RandomCrop(128),
         ])
         self.toTensor = transforms.ToTensor();
         # Prepare list data paths
@@ -38,7 +38,7 @@ class ImageNet(Dataset):
         img = Image.open(imgPath)
 
         inputImage = rgb2lab(np.array(self.transf(img)))
-        image_ab = self.toTensor(cv2.resize(inputImage, (56, 56), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float))
+        image_ab = self.toTensor(cv2.resize(inputImage, (32, 32), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float))
         image_L = torch.from_numpy(inputImage[:,:,0].astype(float)).unsqueeze_(0) - 50.0
         
-        return image_L, image_ab
+        return self.toTensor(img), image_L, image_ab
