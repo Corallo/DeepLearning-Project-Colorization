@@ -35,7 +35,7 @@ parser.add_argument('--print-freq', '-p', default=10, type=int, metavar='N', hel
 parser.add_argument('--resume', default='models/model.pth.tar', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_false',help='use pre-trained model')
-#parser.add_argument('--reduced', dest='reduced', action='store_true', help='use reduced-model')
+parser.add_argument('--reduced', dest='reduced', action='store_true', help='use reduced-model')
 parser.add_argument('--run_dir', default='', type=str)
 parser.add_argument('--kmeans_source', default='imagenet/', type=str)
 
