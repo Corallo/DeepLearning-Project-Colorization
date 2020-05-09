@@ -149,6 +149,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
         output = model(var)
         # record loss
         loss = criterion(output, encoded_target)
+        if torch.isnan(loss):
+            print('NaN value encountered in loss.')
+            continue
         # measure accuracy and record loss
         #prec1, = accuracy(output.data, target)
         losses.update(loss.data, var.size(0))
@@ -240,7 +243,7 @@ def adjust_learning_rate(optimizer, epoch):
     lr = 3e-5
     if epoch >= 2:
         lr = 1e-5
-    if epoch >= 4:
+    if epoch >= 5:
         lr = 3e-6
 
     for param_group in optimizer.param_groups:
