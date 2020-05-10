@@ -3,7 +3,9 @@ from sklearn.neighbors import NearestNeighbors
 import torch
 from PIL import Image
 import glob
-
+import cv2
+from torch.nn.functional import interpolate
+from torchvision.utils import make_grid
 
 ab_bins = np.load('pts_in_hull.npy')
 nbrs = NearestNeighbors(n_neighbors=5, algorithm='kd_tree', p=2).fit(ab_bins)
@@ -66,6 +68,18 @@ def generateImg(Z,light):
     Image = cv2.cvtColor(newImg.astype(np.uint8), cv2.COLOR_LAB2RGB)
     return Image
     
+
+def getImages(L_channel, ab_target, ab_gen, batch_num):
+    L_channel = L_channel[:batch_num,:,:,:]
+    ab_dec = decode(ab_gen[:batch_num,:,:,:], T=0.5)
+    ab_dec_up = interpolate(ab_dec, scale_factor=4, mode='bilinear')
+    ab_target_up = interpolate(ab_target[:batch_num,:,:,:], scale_factor=4, mode='bilinear')
+    img_target = torch.cat([L_channel, ab_target_up], dim=1)
+    img_gen = torch.cat([L_channel, ab_dec_up], dim=1)
+    
+    # return all images in a single batch grid
+    return make_grid(torch.cat([img_target, img_gen], dim=0))
+
 
 def testfun():
     img = np.random.randint(0,255,(64,64,3),dtype=np.uint8)

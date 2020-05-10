@@ -96,11 +96,6 @@ def main():
     if not args.evaluate:
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,num_workers=8, pin_memory=True)
         print("=> Loaded data, length = ", len(train_dataset))
-    #val_loader = torch.utils.data.DataLoader(val_dataset,batch_size=args.batch_size, shuffle=False,num_workers=args.workers, pin_memory=True)
-
-    #input_image, _ = next(iter(train_loader))
-    #model = kmeans_init(model, input_image.double().cuda(), 3, True)
-
 
     # define loss function (criterion) and optimizer
     criterion = loss.classificationLoss
@@ -117,12 +112,6 @@ def main():
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch)
 
-        # evaluate on validation set
-        #prec1 = validate(val_loader, model, criterion, epoch)
-
-        # remember best prec@1 and save checkpoint
-        #is_best = prec1 > best_prec1 
-        #best_prec1 = max(prec1, best_prec1)
         save_checkpoint({
             'epoch': epoch + 1,
             'state_dict': model.state_dict(),
@@ -180,37 +169,12 @@ def train(train_loader, model, criterion, optimizer, epoch):
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
             }, args.reduced)
+        if (i+1) % 10000 == 0:
+            batch_num = np.max(args.batch_size//4,4)
+            idx = i + epoch*len(train_loader)
+            imgs = utils.getImages(img, target, output, batch_num)
+            writer.add_image('data/imgs_gen', imgs, idx)
         writer.add_scalar('data/loss_train', losses.avg, i + epoch*len(train_loader))
-
-
-def validate(val_loader, model, criterion, epoch):
-    model.eval()
-    batch_time = AverageMeter()
-    losses = AverageMeter()
-
-    end = time.time()
-    for i, (img, target) in enumerate(val_loader):
-        var = Variable(img, requires_grad=True).unsqueeze(0).unsqueeze(0)
-        # compute output
-        output = model(var)
-        loss = cirterion()
-
-        # measure accuracy and record loss
-        prec1,  = accuracy(output.data, target)
-        losses.update(loss.data, input.size(0))
-
-        # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        if i % args.print_freq == 0:
-            print('Test: [{0}/{1}]\t'
-                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'.format(
-                   i, len(val_loader), batch_time=batch_time, loss=losses))
-    writer.add_scalar('data/loss_val', losses.avg, epoch)
-
-
-    return 
 
 
 def save_checkpoint(state, reduced, filename='model'):
