@@ -5,7 +5,7 @@ class NNet(torch.nn.Module):
     # CNN class holder
     # In pytorch, ANNs inherit from torch.nn.Module class
 
-    def __init__(self):
+    def __init__(self, regr=True):
         super(NNet, self).__init__()
         # Here we define the network architecture.
         # Following https://arxiv.org/pdf/1603.08511.pdf,
@@ -14,7 +14,7 @@ class NNet(torch.nn.Module):
         
         # We use the nn.Sequential() method to represent all the layers
         # in each convolutional block
-        
+        self.regr = regr
         #  --- conv1 --- 
         self.conv1 = torch.nn.Sequential(
             torch.nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3,
@@ -123,8 +123,9 @@ class NNet(torch.nn.Module):
         # 1x1 Cross Entropy Loss
         self.conv_ab = torch.nn.Conv2d(in_channels=256, out_channels=313, kernel_size=1,
                 stride=1, padding=0)
-
-
+        #Regressor Loss
+        self.regressor = torch.nn.Conv2d(in_channels=256, out_channels=2, kernel_size=1,
+                stride=1, padding=0)
     def forward(self, image):
 
         # Simple forward pass to the network
@@ -138,9 +139,12 @@ class NNet(torch.nn.Module):
         conv6 = self.conv6(conv5)
         conv7 = self.conv7(conv6)
         conv8 = self.conv8(conv7)
-        conv_ab = self.conv_ab(conv8)
 
-        return conv_ab
+        if self.regr:
+            return self.regressor(conv8)
+        else:
+            conv_ab = self.conv_ab(conv8)
+            return conv_ab
 
 
 class DCGAN(torch.nn.Module):
@@ -173,6 +177,10 @@ class DCGAN(torch.nn.Module):
         )
         self.out = torch.nn.Conv2d(in_channels=512, out_channels=1, kernel_size=4, 
                 stride=1, padding=1)
+
+    def set_grads(self, grads):
+        for param in self.parameters():
+            param.requires_grad = grads
 
     def forward(self, image):
         conv1 = self.conv1(image)

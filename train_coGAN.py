@@ -172,6 +172,9 @@ def train(train_loader, model_G, model_D, criterion, optimizer, epoch):
         # Regressor loss term
         loss_G_L2 = criterion_G(output, target)
         loss_G = loss_G_GAN + loss_G_L2*10
+        if torch.isnan(loss_G):
+            print('NaN value encountered in loss_G.')
+            continue
         loss_G.backward()
         optimizer_G.step()
 
