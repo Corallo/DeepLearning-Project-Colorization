@@ -112,7 +112,7 @@ def main():
         print("=> Epoch", epoch, "started.")
         adjust_learning_rate(optimizer_G, optimizer_D, epoch)
         # train for one epoch
-        train(train_loader, model_G, model_D, criterion, optimizer, epoch)
+        train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_G, optimizer_D, epoch)
 
         save_checkpoint({
             'epoch': epoch + 1,
@@ -122,7 +122,7 @@ def main():
         print("=> Epoch", epoch, "finished.")
 
 
-def train(train_loader, model_G, model_D, criterion, optimizer, epoch):
+def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_G, optimizer_D, epoch):
 
     model.train()
     batch_time = AverageMeter()
