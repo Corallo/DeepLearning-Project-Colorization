@@ -7,18 +7,16 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
-
+import numpy as np
 
 import loss
 from model import *
 import utils
-from k_means_init import kmeans_init
 import argparse
 import os
 import time
 from tensorboardX import SummaryWriter
 from datasets import ImageNet
-import kmeans_init
 
 
 parser = argparse.ArgumentParser(description='PyTorch Incidents Training')
@@ -169,11 +167,13 @@ def train(train_loader, model, criterion, optimizer, epoch):
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
             }, args.reduced)
-        if (i+1) % 10000 == 0:
-            batch_num = np.max(args.batch_size//4,4)
+        if (i+1) % 1000 == 0:
+            start = time.time()
+            batch_num = np.maximum(args.batch_size//4,2)
             idx = i + epoch*len(train_loader)
-            imgs = utils.getImages(img, target, output, batch_num)
+            imgs = utils.getImages(img, target, output.detach().cpu(), batch_num)
             writer.add_image('data/imgs_gen', imgs, idx)
+            print("Img conversion time: ", time.time() - start)
         writer.add_scalar('data/loss_train', losses.avg, i + epoch*len(train_loader))
 
 

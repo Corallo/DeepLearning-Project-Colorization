@@ -6,6 +6,7 @@ import glob
 import cv2
 from torch.nn.functional import interpolate
 from torchvision.utils import make_grid
+from skimage.color import lab2rgb
 
 ab_bins = np.load('pts_in_hull.npy')
 nbrs = NearestNeighbors(n_neighbors=5, algorithm='kd_tree', p=2).fit(ab_bins)
@@ -56,8 +57,9 @@ def decode(Z, Q=313, T=1):
     
     Yshape = np.array(Z.shape)[nax].tolist()
     Yshape.append(flat_Y.shape[1])
-
-    return flat_Y.reshape(Yshape)
+    
+    reversed_ax = np.argsort(axorder)
+    return torch.from_numpy(flat_Y.reshape(Yshape).transpose(reversed_ax))
 
 
 def generateImg(Z,light):
@@ -70,15 +72,24 @@ def generateImg(Z,light):
     
 
 def getImages(L_channel, ab_target, ab_gen, batch_num):
-    L_channel = L_channel[:batch_num,:,:,:]
+    L_channel = interpolate(L_channel[:batch_num,:,:,:] + 50.0, scale_factor=0.25, mode='bilinear', 
+        recompute_scale_factor=True, align_corners=True)
+
     ab_dec = decode(ab_gen[:batch_num,:,:,:], T=0.5)
-    ab_dec_up = interpolate(ab_dec, scale_factor=4, mode='bilinear')
-    ab_target_up = interpolate(ab_target[:batch_num,:,:,:], scale_factor=4, mode='bilinear')
-    img_target = torch.cat([L_channel, ab_target_up], dim=1)
-    img_gen = torch.cat([L_channel, ab_dec_up], dim=1)
-    
+
+    ab_target = ab_target[:batch_num,:,:,:]
+    img_target = torch.cat([L_channel, ab_target], dim=1)
+    img_gen = torch.cat([L_channel, ab_dec], dim=1)
+    img_all = torch.cat([img_target, img_gen], dim=0).numpy().transpose((0,2,3,1))
+
+    imgs_all_l = []
+    for i in range(batch_num):
+        imgs_all_l.append(torch.from_numpy(lab2rgb(img_all[i]).transpose((2,0,1))))
+        imgs_all_l.append(torch.from_numpy(lab2rgb(img_all[i + batch_num]).transpose((2,0,1))))
+    img_rgb = torch.stack(imgs_all_l, dim=0)
+
     # return all images in a single batch grid
-    return make_grid(torch.cat([img_target, img_gen], dim=0))
+    return make_grid(img_rgb)
 
 
 def testfun():
