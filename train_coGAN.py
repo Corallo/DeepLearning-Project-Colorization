@@ -124,7 +124,8 @@ def main():
 
 def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_G, optimizer_D, epoch):
 
-    model.train()
+    model_D.train()
+    model_G.train()
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses_L2 = AverageMeter()
