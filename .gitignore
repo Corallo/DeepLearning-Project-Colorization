@@ -5,7 +5,7 @@ tmp/
 ILSVRC2012_img_train/
 *.ipynb
 .DS_Store/
-
+*.caffemodel
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

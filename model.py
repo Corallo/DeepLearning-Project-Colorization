@@ -141,3 +141,44 @@ class NNet(torch.nn.Module):
         conv_ab = self.conv_ab(conv8)
 
         return conv_ab
+
+
+class DCGAN(torch.nn.Module):
+    def __init__(self):
+        super(DCGAN, self).__init__()
+
+
+        self.conv1 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=3, out_channels=64, kernel_size=4, 
+                stride=2, padding=1),
+            torch.nn.LeakyReLU(0.2, True)
+        )
+        self.conv2 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, 
+                stride=2, padding=1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.LeakyReLU(0.2, True)
+        )
+        self.conv3 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=128, out_channels=256, kernel_size=4, 
+                stride=2, padding=1),
+            torch.nn.BatchNorm2d(256),
+            torch.nn.LeakyReLU(0.2, True)
+        )
+        self.conv4 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=256, out_channels=512, kernel_size=4, 
+                stride=2, padding=1),
+            torch.nn.BatchNorm2d(512),
+            torch.nn.LeakyReLU(0.2, True)
+        )
+        self.out = torch.nn.Conv2d(in_channels=512, out_channels=1, kernel_size=4, 
+                stride=1, padding=1)
+
+    def forward(self, image):
+        conv1 = self.conv1(image)
+        conv2 = self.conv2(conv1)
+        conv3 = self.conv3(conv2)
+        conv4 = self.conv4(conv3)
+        out = self.out(conv4)
+
+        return out
