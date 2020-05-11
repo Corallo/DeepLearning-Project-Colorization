@@ -98,13 +98,15 @@ def main():
 
     # define loss function (criterion) and optimizer
     criterion_G = nn.MSELoss()
-    criterion_GAN = nn.BCEWithLogitsLoss()
+    gann_loss = nn.BCEWithLogitsLoss()
     def GANLoss(pred, is_real):
         if is_real:
             target = torch.ones_like(pred)
         else:
             target = torch.zeros_like(pred)
-        return criterion_GAN(pred, target)
+        return gann_loss(pred, target)
+    criterion_GAN = GANLoss
+    
     optimizer_G = torch.optim.Adam([{'params': model_G.parameters()},], args.lr,weight_decay=args.weight_decay, betas=(0.9, 0.99))
     optimizer_D = torch.optim.Adam([{'params': model_D.parameters()},], args.lr,weight_decay=args.weight_decay, betas=(0.9, 0.999))
 
@@ -145,17 +147,17 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         output = model_G(var)
 
         # Update gradients for Discriminator
-        model_D.set_grads(True)
+        model_D.module.set_grads(True)
         optimizer_D.zero_grad()
         # Fake loss term
         output_up = interpolate(output, scale_factor=4, mode='bilinear', 
             recompute_scale_factor=True, align_corners=True)
-        fake_img = torch.cat([img_L, output_up], 1)
+        fake_img = torch.cat([var, output_up], 1)
         fake_prob = model_D(fake_img.detach())
-        loss_D_fake = GANLoss(fake_prob, False)
+        loss_D_fake = criterion_GAN(fake_prob, False)
         # Real loss term
         real_prob = model_D(real)
-        loss_D_real = GANLoss(real_prob, True)
+        loss_D_real = criterion_GAN(real_prob, True)
 
         loss_D = (loss_D_real + loss_D_fake)*0.5
         if torch.isnan(loss_D):
@@ -165,11 +167,11 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         optimizer_D.step()
 
         # Update gradients for Generator
-        model_D.set_grads(False)
+        model_D.module.set_grads(False)
         optimizer_G.zero_grad()
         fake_prob = model_D(fake_img)
         # Fool the discriminator
-        loss_G_GAN = GANLoss(fake_prob, True)
+        loss_G_GAN = criterion_GAN(fake_prob, True)
         # Regressor loss term
         loss_G_L2 = criterion_G(output, target)
         loss_G = loss_G_GAN + loss_G_L2*10
