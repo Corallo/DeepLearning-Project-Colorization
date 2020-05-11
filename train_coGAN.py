@@ -110,7 +110,7 @@ def main():
 
     for epoch in range(args.start_epoch, args.epochs):
         print("=> Epoch", epoch, "started.")
-        adjust_learning_rate(optimizer, epoch)
+        adjust_learning_rate(optimizer_G, optimizer_D, epoch)
         # train for one epoch
         train(train_loader, model_G, model_D, criterion, optimizer, epoch)
 
@@ -238,7 +238,7 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def adjust_learning_rate(optimizer, epoch):
+def adjust_learning_rate(optimizer_G, optimizer_D, epoch):
     """Sets the learning rate to the initial LR decayed by 10 every n epochs"""
     lr = 3e-5
     if epoch >= 2:
