@@ -143,7 +143,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         data_time.update(time.time() - end)
         var = Variable(img_L.float(), requires_grad=True).cuda()
         real = Variable(real.float(), requires_grad=True).cuda()
-        target = Variable(utils.soft_encode_ab(target).float(), requires_grad=False).cuda()
+        target_class = Variable(utils.soft_encode_ab(target).float(), requires_grad=False).cuda()
         # compute output G(L)
         output = model_G(var)
 
@@ -174,7 +174,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         # Fool the discriminator
         loss_G_GAN = criterion_GAN(fake_prob, True)
         # Regressor loss term
-        loss_G_L2 = criterion_G(output, target)
+        loss_G_L2 = criterion_G(output, target_class)
         loss_G = loss_G_GAN + loss_G_L2*10
         if torch.isnan(loss_G):
             print('NaN value encountered in loss_G.')
@@ -208,7 +208,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
             start = time.time()
             batch_num = np.maximum(args.batch_size//4,2)
             idx = i + epoch*len(train_loader)
-            imgs = utils.getImages(img_L.float(), target.cpu(), output.detach().cpu(), batch_num, decode=True)
+            imgs = utils.getImages(var.detach(), target.cuda(), output.detach(), batch_num, do_decode=True)
             writer.add_image('data/imgs_gen', imgs, idx)
             print("Img conversion time: ", time.time() - start)
         writer.add_scalar('data/L2_loss_train', losses_L2.avg, i + epoch*len(train_loader))

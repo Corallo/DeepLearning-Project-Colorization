@@ -39,10 +39,10 @@ class ImageNet(Dataset):
 
         inputImage = rgb2lab(np.array(self.transf(img))).astype(float)
         inputImage[:,:,0] -= 50.0
-        image_ab = self.toTensor(cv2.resize(inputImage, (56, 56), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float))
-        image_L = torch.from_numpy(inputImage[:,:,0]).unsqueeze_(0)
+        image_ab = self.toTensor(cv2.resize(inputImage, (56, 56), interpolation = cv2.INTER_AREA)[:,:,1:].astype(float)).float()
+        image_L = torch.from_numpy(inputImage[:,:,0]).unsqueeze_(0).float()
         if self.output_full:
-            img_all = torch.from_numpy(inputImage)
+            img_all = self.toTensor(inputImage).float()
             return img_all, image_L, image_ab
         else:
             return image_L, image_ab

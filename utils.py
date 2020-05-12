@@ -62,10 +62,10 @@ def generateImg(Z,light):
     Image = cv2.cvtColor(newImg.astype(np.uint8), cv2.COLOR_LAB2RGB)
     return Image
 
-def getImages(L_channel, ab_target, ab_gen, batch_num, decode=True):
+def getImages(L_channel, ab_target, ab_gen, batch_num, do_decode=True):
     L_channel = interpolate(L_channel[:batch_num,:,:,:] + 50.0, scale_factor=0.25, mode='bilinear', 
         recompute_scale_factor=True, align_corners=True)
-    if decode:
+    if do_decode:
         ab_gen = decode(ab_gen[:batch_num,:,:,:], T=0.38)
     else:
         ab_gen = ab_gen[:batch_num,:,:,:]
@@ -73,7 +73,7 @@ def getImages(L_channel, ab_target, ab_gen, batch_num, decode=True):
     ab_target = ab_target[:batch_num,:,:,:]
     img_target = torch.cat([L_channel, ab_target], dim=1)
     img_gen = torch.cat([L_channel, ab_gen], dim=1)
-    img_all = torch.cat([img_target, img_gen], dim=0).numpy().transpose((0,2,3,1))
+    img_all = torch.cat([img_target, img_gen], dim=0).cpu().numpy().transpose((0,2,3,1))
 
     imgs_all_l = []
     for i in range(batch_num):
