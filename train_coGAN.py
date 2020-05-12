@@ -212,7 +212,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
             print("Img conversion time: ", time.time() - start)
         writer.add_scalar('data/L2_loss_train', losses_L2.avg, i + epoch*len(train_loader))
         writer.add_scalar('data/D_loss_train', losses_D.avg, i + epoch*len(train_loader))
-        writer.add_scalat('data/G_loss_train', losses_G.avg, i + epoch*len(train_loader))
+        writer.add_scalar('data/G_loss_train', losses_G.avg, i + epoch*len(train_loader))
 
 
 def save_checkpoint(state, reduced, filename='model'):
