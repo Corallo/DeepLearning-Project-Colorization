@@ -4,13 +4,13 @@ import torch
 from PIL import Image
 import glob
 import cv2
-from torch.nn.functional import interpolate
+from torch.nn.functional import interpolate, softmax
 from torchvision.utils import make_grid
 from skimage.color import lab2rgb
 
 ab_bins = np.load('pts_in_hull.npy')
 nbrs = NearestNeighbors(n_neighbors=5, algorithm='kd_tree', p=2).fit(ab_bins)
-ab_bins = torch.from_numpy(ab_bins).cuda()
+ab_bins = torch.from_numpy(ab_bins).cuda().float()
 
 def soft_encode_ab(raw_ab):
 

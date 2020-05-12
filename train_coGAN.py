@@ -151,7 +151,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         model_D.module.set_grads(True)
         optimizer_D.zero_grad()
         # Fake loss term
-        output_up = interpolate(decode(output), scale_factor=4, mode='bilinear', 
+        output_up = interpolate(utils.decode(output), scale_factor=4, mode='bilinear', 
             recompute_scale_factor=True, align_corners=True)
         fake_img = torch.cat([var, output_up], 1)
         fake_prob = model_D(fake_img.detach())
@@ -186,6 +186,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         losses_G.update(loss_G_GAN.data, var.size(0))
         losses_L2.update(loss_G_L2.data, var.size(0))
 
+        batch_time.update(time.time() - end)
         end = time.time()
 
         if i % args.print_freq == 0:
