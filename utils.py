@@ -8,7 +8,7 @@ from torch.nn.functional import interpolate
 from torchvision.utils import make_grid
 from skimage.color import lab2rgb
 
-ab_bins = np.load('pts_in_hull.npy')
+ab_bins = torch.from_numpy(np.load('pts_in_hull.npy')).cuda()
 nbrs = NearestNeighbors(n_neighbors=5, algorithm='kd_tree', p=2).fit(ab_bins)
 
 def soft_encode_ab(raw_ab):
@@ -43,24 +43,15 @@ def soft_encode_ab(raw_ab):
     return torch.from_numpy(encoded_ab)
 
 
-def decode(Z, Q=313, T=1):
+def decode(Z, T=0.38):
 
-    Z = torch.exp(Z/T)
-
-    Z = (Z/Z.sum(dim=1, keepdim=True)).numpy()
-    nax = np.setdiff1d(np.arange(0,Z.ndim),np.array((1)))
-    axorder = np.concatenate((nax,np.array(1).flatten()),axis=0)
-
-    flat_Z = Z.transpose((axorder)).reshape((-1,Q))
+    # New decoder function  
     
-    flat_Y = np.dot(flat_Z, ab_bins)
+    C, Q, H, W = list(Z.size())
     
-    Yshape = np.array(Z.shape)[nax].tolist()
-    Yshape.append(flat_Y.shape[1])
-    
-    reversed_ax = np.argsort(axorder)
-    return torch.from_numpy(flat_Y.reshape(Yshape).transpose(reversed_ax))
-
+    flat_Z = softmax(Z/T, dim=1).transpose(1,2).transpose(2,3).reshape((-1, Q))
+    flat_Y = torch.mm(flat_Z,ab_bins)
+    return flat_Y.reshape((C,H,W,2)).transpose(2,3).transpose(1,2)
 
 def generateImg(Z,light):
     Y = getYgivenZ(Z)
@@ -74,7 +65,7 @@ def getImages(L_channel, ab_target, ab_gen, batch_num, decode=True):
     L_channel = interpolate(L_channel[:batch_num,:,:,:] + 50.0, scale_factor=0.25, mode='bilinear', 
         recompute_scale_factor=True, align_corners=True)
     if decode:
-        ab_gen = decode(ab_gen[:batch_num,:,:,:], T=0.5)
+        ab_gen = decode(ab_gen[:batch_num,:,:,:], T=0.38)
     else:
         ab_gen = ab_gen[:batch_num,:,:,:]
     

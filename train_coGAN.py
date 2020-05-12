@@ -64,7 +64,7 @@ def main():
     print("=> creating model")
 
 
-    model_G = nn.DataParallel(NNet()).cuda().float()
+    model_G = nn.DataParallel(NNet(regr=False)).cuda().float()
     model_D = nn.DataParallel(DCGAN()).cuda().float()
 
     weights_init(model_G, args)
@@ -97,7 +97,7 @@ def main():
         print("=> Loaded data, length = ", len(train_dataset))
 
     # define loss function (criterion) and optimizer
-    criterion_G = nn.MSELoss().cuda()
+    criterion_G = loss.classificationLoss
     gann_loss = nn.BCEWithLogitsLoss().cuda()
     def GANLoss(pred, is_real):
         if is_real:
@@ -143,7 +143,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         data_time.update(time.time() - end)
         var = Variable(img_L.float(), requires_grad=True).cuda()
         real = Variable(real.float(), requires_grad=True).cuda()
-        target = target.float().cuda()
+        target = Variable(utils.soft_encode_ab(target).float(), requires_grad=False).cuda()
         # compute output G(L)
         output = model_G(var)
 
@@ -151,7 +151,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         model_D.module.set_grads(True)
         optimizer_D.zero_grad()
         # Fake loss term
-        output_up = interpolate(output, scale_factor=4, mode='bilinear', 
+        output_up = interpolate(decode(output), scale_factor=4, mode='bilinear', 
             recompute_scale_factor=True, align_corners=True)
         fake_img = torch.cat([var, output_up], 1)
         fake_prob = model_D(fake_img.detach())
@@ -207,7 +207,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
             start = time.time()
             batch_num = np.maximum(args.batch_size//4,2)
             idx = i + epoch*len(train_loader)
-            imgs = utils.getImages(img_L.float(), target.cpu(), output.detach().cpu(), batch_num, decode=False)
+            imgs = utils.getImages(img_L.float(), target.cpu(), output.detach().cpu(), batch_num, decode=True)
             writer.add_image('data/imgs_gen', imgs, idx)
             print("Img conversion time: ", time.time() - start)
         writer.add_scalar('data/L2_loss_train', losses_L2.avg, i + epoch*len(train_loader))
@@ -219,7 +219,7 @@ def save_checkpoint(state, reduced, filename='model'):
     if reduced:
         torch.save(state, "models/" + filename + '_reduced_latest.pth.tar')
     else:
-        torch.save(state, "models/" + filename + '_gan_latest.pth.tar')
+        torch.save(state, "models/" + filename + '_gan_multiclass_latest.pth.tar')
 
 
 class AverageMeter(object):

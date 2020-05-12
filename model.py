@@ -5,7 +5,7 @@ class NNet(torch.nn.Module):
     # CNN class holder
     # In pytorch, ANNs inherit from torch.nn.Module class
 
-    def __init__(self, regr=True):
+    def __init__(self, regr=False):
         super(NNet, self).__init__()
         # Here we define the network architecture.
         # Following https://arxiv.org/pdf/1603.08511.pdf,
@@ -120,12 +120,16 @@ class NNet(torch.nn.Module):
             torch.nn.ReLU()
         )
 
-        # 1x1 Cross Entropy Loss
-        self.conv_ab = torch.nn.Conv2d(in_channels=256, out_channels=313, kernel_size=1,
+
+        if not self.regr:
+            # 1x1 Cross Entropy Loss
+            self.conv_ab = torch.nn.Conv2d(in_channels=256, out_channels=313, kernel_size=1,
                 stride=1, padding=0)
-        #Regressor Loss
-        self.regressor = torch.nn.Conv2d(in_channels=256, out_channels=2, kernel_size=1,
+        else:
+            #Regressor Loss
+            self.regressor = torch.nn.Conv2d(in_channels=256, out_channels=2, kernel_size=1,
                 stride=1, padding=0)
+
     def forward(self, image):
 
         # Simple forward pass to the network
