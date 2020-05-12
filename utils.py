@@ -8,8 +8,9 @@ from torch.nn.functional import interpolate
 from torchvision.utils import make_grid
 from skimage.color import lab2rgb
 
-ab_bins = torch.from_numpy(np.load('pts_in_hull.npy')).cuda()
+ab_bins = np.load('pts_in_hull.npy')
 nbrs = NearestNeighbors(n_neighbors=5, algorithm='kd_tree', p=2).fit(ab_bins)
+ab_bins = torch.from_numpy(ab_bins).cuda()
 
 def soft_encode_ab(raw_ab):
 
@@ -29,7 +30,7 @@ def soft_encode_ab(raw_ab):
     dist_w = np.exp(-distances**2/(2*5**2))
     dist_w = dist_w/np.sum(dist_w,axis=1, keepdims=True)
 
-    encoded_ab_flat = np.zeros((flat_ab.shape[0],ab_bins.shape[0]))
+    encoded_ab_flat = np.zeros((flat_ab.shape[0],313))
     encoded_ab_flat[np.arange(flat_ab.shape[0])[:,None], indices] = dist_w
     
     # Unflatten (C*H*W, Q) array into (C, Q, H, W)
