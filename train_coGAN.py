@@ -64,8 +64,8 @@ def main():
     print("=> creating model")
 
 
-    model_G = nn.DataParallel(NNet()).cuda()
-    model_D = nn.DataParallel(DCGAN()).cuda()
+    model_G = nn.DataParallel(NNet()).cuda().float()
+    model_D = nn.DataParallel(DCGAN()).cuda().float()
 
     weights_init(model_G, args)
     weights_init(model_D, args)
@@ -97,8 +97,8 @@ def main():
         print("=> Loaded data, length = ", len(train_dataset))
 
     # define loss function (criterion) and optimizer
-    criterion_G = nn.MSELoss()
-    gann_loss = nn.BCEWithLogitsLoss()
+    criterion_G = nn.MSELoss().cuda()
+    gann_loss = nn.BCEWithLogitsLoss().cuda()
     def GANLoss(pred, is_real):
         if is_real:
             target = torch.ones_like(pred)
@@ -143,6 +143,7 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
         data_time.update(time.time() - end)
         var = Variable(img_L.float(), requires_grad=True).cuda()
         real = Variable(real.float(), requires_grad=True).cuda()
+        target = target.float().cuda()
         # compute output G(L)
         output = model_G(var)
 
@@ -206,14 +207,12 @@ def train(train_loader, model_G, model_D, criterion_G, criterion_GAN, optimizer_
             start = time.time()
             batch_num = np.maximum(args.batch_size//4,2)
             idx = i + epoch*len(train_loader)
-            imgs = utils.getImages(img, target, output.detach().cpu(), batch_num, decode=False)
+            imgs = utils.getImages(img_L.float(), target.cpu(), output.detach().cpu(), batch_num, decode=False)
             writer.add_image('data/imgs_gen', imgs, idx)
             print("Img conversion time: ", time.time() - start)
         writer.add_scalar('data/L2_loss_train', losses_L2.avg, i + epoch*len(train_loader))
-        writer.add_scalar('data/GAN_loss_train', {
-            'loss_G': losses_G.avg,
-            'loss_D': losses_D.avg
-        }, i + epoch*len(train_loader))
+        writer.add_scalar('data/D_loss_train', losses_D.avg, i + epoch*len(train_loader))
+        writer.add_scalat('data/G_loss_train', losses_G.avg, i + epoch*len(train_loader))
 
 
 def save_checkpoint(state, reduced, filename='model'):
